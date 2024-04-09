@@ -3,12 +3,11 @@ A light and easy to use PHP library for generating various Bitcoin address forma
 
 ## Features
 
-- Generate ECDSA key pairs on the secp256k1 curve
-- Retrieve uncompressed and compressed public keys
-- Generate private keys in Wallet Import Format (WIF)
-- Generate P2PKH, P2SH, P2WPKH, and P2WSH addresses
-- Support for Base58Check and Bech32 encoding (SegWit)
-- Convert from your own hex keys to various address formats
+- Generation of both uncompressed and compressed public keys
+- Secure creation of private keys in Wallet Import Format (WIF)
+- Support for multiple Bitcoin address formats: P2PKH, P2SH, P2WPKH, and P2WSH (SegWit)
+- Utilizes the robust OpenSSL library for cryptographic operations
+- Easy integration with existing PHP projects
 
 ## Requirements
 
