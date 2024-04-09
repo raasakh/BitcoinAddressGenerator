@@ -1,14 +1,14 @@
 # BitcoinKeyGenerator
-A PHP library for generating various Bitcoin address formats along with their private and public keys
+A light and easy to use PHP library for generating various Bitcoin address formats along with their private and public keys 
 
 ## Features
 
-- Very light, secure and easy to use
 - Generate ECDSA key pairs on the secp256k1 curve
 - Retrieve uncompressed and compressed public keys
 - Generate private keys in Wallet Import Format (WIF)
 - Generate P2PKH, P2SH, P2WPKH, and P2WSH addresses
 - Support for Base58Check and Bech32 encoding (SegWit)
+- Convert from your own hex keys to various address formats
 
 ## Requirements
 
