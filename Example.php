@@ -1,7 +1,7 @@
 <?php
-require_once('BtcKeyGen.php');
+require_once('BitcoinAddressGenerator.php');
 
-$BTC = new BtcKeyGen();
+$BTC = new BitcoinAddressGenerator();
 
 echo "Private key: ".$BTC->getPrivateKey()."\n";
 echo "Public key: ".$BTC->getPublicKey()."\n";
