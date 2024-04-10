@@ -48,7 +48,7 @@ class BtcKeyGen {
 	/**
 	 * Generates a new OpenSSL key resource based on predefined configurations.
 	 */
-	private function newKey() {
+	public function newKey() {
 		$config = [
 			'private_key_type' => OPENSSL_KEYTYPE_EC,
 			'curve_name' => 'secp256k1'
