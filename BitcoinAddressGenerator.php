@@ -17,7 +17,7 @@
  *
  * @author Luca Soltoggio
  * https://www.lucasoltoggio.it
- * https://github.com/toggio/Bitcoin-Address-Generator
+ * https://github.com/toggio/BitcoinAddressGenerator
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
