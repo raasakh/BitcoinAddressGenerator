@@ -1,6 +1,6 @@
 <?php
 /**
- * Bitcoin Key Generator (BtcKeyGen) v0.9
+ * Bitcoin Address Generator (BitcoinAddressGenerator) v0.9
  *
  * A PHP library for generating various Bitcoin address formats along with their private and public keys 
  *
@@ -17,7 +17,7 @@
  *
  * @author Luca Soltoggio
  * https://www.lucasoltoggio.it
- * https://github.com/toggio/BitcoinKeyGenerator
+ * https://github.com/toggio/Bitcoin-Address-Generator
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,7 +32,7 @@
  *
  */
 
-class BtcKeyGen {
+class BitcoinAddressGenerator {
 	private $keyResource;
 	private $privateKey;
 	private $publicKey;
