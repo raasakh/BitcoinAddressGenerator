@@ -1,4 +1,4 @@
-# BitcoinKeyGenerator
+# Bitcoin Address Generator
 A light and easy to use PHP library for generating various Bitcoin address formats along with their private and public keys 
 
 ## Features
@@ -17,13 +17,13 @@ A light and easy to use PHP library for generating various Bitcoin address forma
 
 ## Usage
 
-Include the `BtcKeyGen.php` file in your project, create an instance of the BtcKeyGen class and use its methods to generate Bitcoin addresses and keys, like in the following example:
+Include the `BitcoinAddressGenerator.php` file in your project, create an instance of the BitcoinAddressGenerator class and use its methods to generate Bitcoin addresses and keys, like in the following example:
 
 ```php
 <?php
-require_once('BtcKeyGen.php');
+require_once('BitcoinAddressGenerator.php');
 
-$BTC = new BtcKeyGen();
+$BTC = new BitcoinAddressGenerator();
 
 echo "Private key: ".$BTC->getPrivateKey()."\n";
 echo "Public key: ".$BTC->getPublicKey()."\n";
@@ -54,7 +54,7 @@ P2WSH Address: bc1u7znk6gn992vuzn9u5044rdurwa8yw5a5f5kaacgs555mnnrarvswkuv8v
 
 ## Contributions
 
-Contributions to **BitcoinKeyGenerator** are highly welcomed and appreciated. Whether it's reporting bugs, suggesting improvements, your input is valuable.
+Contributions to **BitcoinAddressGenerator** are highly welcomed and appreciated. Whether it's reporting bugs, suggesting improvements, your input is valuable.
 
 ## Help us
 
@@ -63,6 +63,6 @@ If you find this project useful and would like to support its development, consi
 **Bitcoin (BTC) Address:** `3Ctmurhy18PmkTKPa2s7PjfAKzR8ZBj8Na`
 
 ## License
-**BitcoinKeyGenerator** is licensed under the Apache License, Version 2.0. You are free to use, modify, and distribute the library in compliance with the license.
+**BitcoinAddressGenerator** is licensed under the Apache License, Version 2.0. You are free to use, modify, and distribute the library in compliance with the license.
 
 Copyright (C) 2024 Luca Soltoggio - https://www.lucasoltoggio.it/
