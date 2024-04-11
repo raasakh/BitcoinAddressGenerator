@@ -2,7 +2,7 @@
 /**
  * Bitcoin Address Generator (BitcoinAddressGenerator) v1.0
  *
- * A PHP library for generating various Bitcoin address formats along with their private and public keys.
+ * A PHP library for generating virtually any Bitcoin address format along with their private and public keys.
  *
  * Bitcoin Address Generator is a PHP class designed to facilitate the generation
  * of Bitcoin Wallets and various Bitcoin address formats, including P2PKH, P2SH, P2WPKH,
