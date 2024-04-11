@@ -1,5 +1,5 @@
 # Bitcoin Address Generator
-A light and easy to use PHP library for generating various Bitcoin address formats along with their private and public keys 
+A light and easy to use PHP library for generating virtually any Bitcoin address formats along with their private and public keys 
 
 ## Features
 
