@@ -3,16 +3,18 @@ A light and easy to use PHP library for generating various Bitcoin address forma
 
 ## Features
 
-- Generation of both uncompressed and compressed public keys
+- Custom-built functions to handle ECDSA key pair generation on the secp256k1 curve
+- Generation of both uncompressed and compressed private and public keys
 - Secure creation of private keys in Wallet Import Format (WIF)
 - Support for multiple Bitcoin address formats: P2PKH, P2SH, P2WPKH, and P2WSH (SegWit)
-- Utilizes the robust OpenSSL library for cryptographic operations
+- Support both for random private key generation or known private key to public key derivation
+- Support for Brain Wallet (using passphrase and SHA256 algorithm)
+- Utilizes cryptographically secure random number generator and functions
 - Easy integration with existing PHP projects
 
 ## Requirements
 
 - PHP 7.1 or higher
-- OpenSSL PHP Extension
 - GMP PHP Extension
 
 ## Usage
