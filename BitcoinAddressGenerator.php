@@ -1,17 +1,21 @@
 <?php
 /**
- * Bitcoin Address Generator (BitcoinAddressGenerator) v0.9
+ * Bitcoin Address Generator (BitcoinAddressGenerator) v1.0
  *
- * A PHP library for generating various Bitcoin address formats along with their private and public keys 
+ * A PHP library for generating various Bitcoin address formats along with their private and public keys.
  *
  * Bitcoin Address Generator is a PHP class designed to facilitate the generation
- * of various Bitcoin address formats, including P2PKH, P2SH, P2WPKH, and P2WSH,
- * along with their corresponding uncompressed and compressed private and public keys.
- * This class utilizes the OpenSSL library to generate ECDSA (Elliptic Curve Digital
- * Signature Algorithm) key pairs on the secp256k1 curve, which is the cryptographic 
- * algorithm behind Bitcoin addresses. The class offers methods to generate new key 
- * pairs, retrieve private and public keys, convert keys to various Bitcoin address 
- * formats, and encode data in Base58Check and Bech32 encoding schemes.
+ * of Bitcoin Wallets and various Bitcoin address formats, including P2PKH, P2SH, P2WPKH,
+ * and P2WSH, along with their corresponding uncompressed and compressed private and 
+ * public keys.
+ * This class employs custom-built functions to handle ECDSA (Elliptic Curve Digital
+ * Signature Algorithm) key pair generation on the secp256k1 curve, which is the 
+ * cryptographic algorithm behind Bitcoin addresses.
+ * The custom functions ensure precise control over the elliptic curve operations, 
+ * enabling the creation of Bitcoin addresses from scratch. 
+ * The class provides methods to generate new private and public keys and convert
+ * them to virtually any Bitcoin address format ensuring flexibility across different
+ * Bitcoin applications.
  *
  * Copyright (C) 2024 under Apache License, Version 2.0
  *
@@ -33,67 +37,64 @@
  */
 
 class BitcoinAddressGenerator {
-	private $keyResource;
 	private $privateKey;
 	private $publicKey;
 	private $compPublicKey;
+	private $x,$y,$c;
 
 	/**
 	 * Constructor: Initializes Base58 characters and generates a key resource.
 	 */
 	public function __construct() {
-		$this->newKey();
+		$this->newKeys();
 	}
 	
 	/**
-	 * Generates a new OpenSSL key resource based on predefined configurations.
+	 * Generates a new set of cryptographic keys or uses a known key to generate the corresponding keys.
+	 * This method first checks if a known private key is provided. If not, it generates a new
+	 * cryptographically secure 256-bit private key. If a provided key is invalid (either not the correct
+	 * length or not a proper hexadecimal string), the method hashes the key to produce a valid 256-bit 
+	 * private key. It then uses this private key to find the corresponding public keys based on the 
+	 * SECP256k1 elliptic curve.
+	 *
+	 * @param string|null $knownKey Optionally provide a known private key in hexadecimal format.
+	 * If false, a new strong cryptographically secure 256-bit private key is generated using random_bytes 
+	 * and converted to hexadecimal.
 	 */
-	public function newKey() {
-		$config = [
-			'private_key_type' => OPENSSL_KEYTYPE_EC,
-			'curve_name' => 'secp256k1'
-		];
-		$this->keyResource = openssl_pkey_new($config);
-		$this->privateKey = $this->getPrivateKey();
+	public function newKeys($knownKey = null) {
+		$this->privateKey = $knownKey ? $knownKey : bin2hex(random_bytes(32));
+		if (strlen($this->privateKey) != 64 || @hex2bin($this->privateKey) == false) $this->privateKey=(hash('sha256',$this->privateKey));
+		$this->secp256k1_pfind($this->privateKey);
 		$this->publicKey = $this->getPublicKey();
 		$this->compPublicKey = $this->getCompPublicKey();
+		return $knownKey ? true : false;
 	}
 
 	/**
-	 * Extracts the private key from the OpenSSL key resource in hexadecimal format.
+	 * Retrieves the private key.
 	 *
 	 * @return string Hexadecimal private key.
 	 */
 	public function getPrivateKey() {
-		openssl_pkey_export($this->keyResource, $privateKey);
-		$beginMarker = "-----BEGIN PRIVATE KEY-----";
-		$endMarker = "-----END PRIVATE KEY-----";
-		$binaryKey = bin2hex(base64_decode(trim(str_replace([$beginMarker, $endMarker], '', $privateKey))));
-		return substr($binaryKey, strpos($binaryKey, '0420') + 4, 64);
+		return $this->privateKey;
 	}
 
 	/**
-	 * Retrieves the uncompressed public key from the OpenSSL key resource.
+	 * Retrieves the uncompressed public key.
 	 *
 	 * @return string Hexadecimal uncompressed public key.
 	 */
 	public function getPublicKey() {
-		$keyDetails = openssl_pkey_get_details($this->keyResource);
-		$x = bin2hex(substr($keyDetails["ec"]["x"], 0, 32));
-		$y = bin2hex(substr($keyDetails["ec"]["y"], 0, 32));
-		return '04' . $x . $y;
+		return '04' . str_pad($this->x, 64, '0', STR_PAD_LEFT) . str_pad($this->y, 64, '0', STR_PAD_LEFT);
 	}
 
 	/**
-	 * Retrieves the compressed public key from the OpenSSL key resource.
+	 * Retrieves the compressed public key.
 	 *
 	 * @return string Hexadecimal compressed public key.
 	 */
 	public function getCompPublicKey() {
-		$keyDetails = openssl_pkey_get_details($this->keyResource);
-		$x = bin2hex(substr($keyDetails["ec"]["x"], 0, 32));
-		$yLastByte = bin2hex(substr($keyDetails["ec"]["y"], -1));
-		return ((hexdec($yLastByte) % 2 == 0) ? '02' : '03') . $x;
+		return $this->c.str_pad($this->x, 64, '0', STR_PAD_LEFT);;
 	}
 
 	/**
@@ -219,7 +220,7 @@ class BitcoinAddressGenerator {
 	 * @param string $hexStr The hexadecimal string to convert.
 	 * @return array An array of 5-bit integers.
 	 */
-	public function convertHexTo5BitArray($hexStr) {
+	private function convertHexTo5BitArray($hexStr) {
 		$binaryStr = '';
 		foreach (str_split($hexStr) as $hexChar) {
 			$binaryStr .= str_pad(base_convert($hexChar, 16, 2), 4, '0', STR_PAD_LEFT);
@@ -235,7 +236,7 @@ class BitcoinAddressGenerator {
 	 * @param array $values The value array.
 	 * @return int The polymod.
 	 */
-	public function bech32_polymod($values) {
+	private function bech32_polymod($values) {
 		$generator = [0x3b6a57b2, 0x26508e6d, 0x1ea119fa, 0x3d4233dd, 0x2a1462b3];
 		$chk = 1;
 		foreach ($values as $value) {
@@ -256,7 +257,7 @@ class BitcoinAddressGenerator {
 	 * @param string $hrp The human-readable part.
 	 * @return array The expanded HRP.
 	 */
-	public function bech32_hrp_expand($hrp) {
+	private function bech32_hrp_expand($hrp) {
 		$expand = [];
 		foreach (str_split($hrp) as $char) {
 			$expand[] = ord($char) >> 5;
@@ -275,7 +276,7 @@ class BitcoinAddressGenerator {
 	 * @param string $hrp The human-readable part.
 	 * @return array The checksum.
 	 */
-	public function bech32_create_checksum($data, $hrp) {
+	private function bech32_create_checksum($data, $hrp) {
 		$values = array_merge($this->bech32_hrp_expand($hrp), $data, [0, 0, 0, 0, 0, 0]);
 		$polymod = $this->bech32_polymod($values) ^ 1;
 		$checksum = [];
@@ -283,6 +284,116 @@ class BitcoinAddressGenerator {
 			$checksum[] = ($polymod >> (5 * (5 - $i))) & 31;
 		}
 		return $checksum;
+	}
+	/**
+	 * Calculates the multiplicative inverse of a number modulo p.
+	 *
+	 * @param GMP|string|int $x The number to find the inverse of.
+	 * @param GMP|string|int $p The modulus.
+	 * @return GMP The multiplicative inverse.
+	 */
+	private function secp256k1_inverse($x, $p) {
+		$inv1 = gmp_init(1);
+		$inv2 = gmp_init(0);
+		
+		while (gmp_cmp($p, 0) != 0 && gmp_cmp($p, 1) != 0) {
+			list($inv1, $inv2) = array(
+				$inv2,
+				gmp_sub($inv1, gmp_mul($inv2, gmp_div_q($x, $p)))
+			);
+			list($x, $p) = array(
+				$p,
+				gmp_mod($x, $p)
+			);
+		}
+		return $inv2;
+	}
+	
+	/**
+	 * Doubles a point on the SECP256k1 curve.
+	 *
+	 * @param array|null $point The point to double.
+	 * @param GMP|string|int $p The prime modulus of the curve.
+	 * @return array|null The doubled point.
+	 */
+	private function secp256k1_dblpt($point, $p) {
+		if (is_null($point)) return null;
+		list($x, $y) = $point;
+		if (gmp_cmp($y, "0") == 0) return null;
+		
+		$slope = gmp_mul(gmp_mul("3", gmp_pow($x, 2)), $this->secp256k1_inverse(gmp_mul("2", $y), $p));
+		$slope = gmp_mod($slope, $p);
+		
+		$xsum = gmp_sub(gmp_mod(gmp_pow($slope, 2), $p), gmp_mul("2", $x));
+		$ysum = gmp_sub(gmp_mul($slope, gmp_sub($x, $xsum)), $y);
+    
+		return array(gmp_mod($xsum, $p), gmp_mod($ysum, $p));
+	}
+	
+	/**
+	 * Adds two points on the SECP256k1 curve.
+	 *
+	 * @param array|null $p1 The first point.
+	 * @param array|null $p2 The second point.
+	 * @param GMP|string|int $p The prime modulus of the curve.
+	 * @return array|null The sum of the points.
+	 */
+	private function secp256k1_addpt($p1, $p2, $p) {
+		if ($p1 === null || $p2 === null) return null;
+		
+		list($x1, $y1) = $p1;
+		list($x2, $y2) = $p2;
+		
+		if (gmp_cmp($x1, $x2) == 0) return $this->secp256k1_dblpt($p1, $p);
+		
+		$slope = gmp_mul(gmp_sub($y1, $y2), $this->secp256k1_inverse(gmp_sub($x1, $x2), $p));
+		$slope = gmp_mod($slope, $p);
+		
+		$xsum = gmp_sub(gmp_mod(gmp_pow($slope, 2), $p), gmp_add($x1, $x2));
+		$ysum = gmp_sub(gmp_mul($slope, gmp_sub($x1, $xsum)), $y1);
+		
+		return array(gmp_mod($xsum, $p), gmp_mod($ysum, $p));
+	}
+
+	/**
+	 * Multiplies a point on the SECP256k1 curve by a scalar.
+	 *
+	 * @param array $pt The point to multiply.
+	 * @param GMP|string|int $a The scalar to multiply the point by.
+	 * @param GMP|string|int $p The prime modulus of the curve.
+	 * @return array|null The resulting point.
+	 */
+	private function secp256k1_ptmul($pt, $a, $p) {
+		$scale = $pt;
+		$acc = null;
+		
+		while (gmp_cmp($a, "0") != 0) {
+			if (gmp_mod($a, 2) == 1) {
+				$acc = $acc === null ? $scale : $this->secp256k1_addpt($acc, $scale, $p);
+			}
+			$scale = $this->secp256k1_dblpt($scale, $p);
+			$a = gmp_div_q($a, 2);
+		}
+		return $acc;
+	}
+	
+	/**
+	 * Finds the public key from a given private key hex string on the SECP256k1 curve.
+	 *
+	 * @param string $privateKey The private key in hexadecimal form.
+	 */
+	private function secp256k1_pfind($privateKey) {
+		$p      = gmp_init("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
+		$Gx     = gmp_init("0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798", 16);
+		$Gy     = gmp_init("0x483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8", 16);
+		$g      = array($Gx, $Gy);
+		
+		$n      = gmp_init($privateKey, 16);
+		$pair   = $this->secp256k1_ptmul($g, $n, $p);
+		
+		$this->x = gmp_strval($pair[0], 16);
+		$this->y = gmp_strval($pair[1], 16);
+		$this->c = (gmp_mod($pair[1], 2) == 0) ? '02' : '03';
 	}
 	
 	/**
@@ -294,7 +405,7 @@ class BitcoinAddressGenerator {
 	 * @param bool $alt Indicates whether to generate a P2WSH (true) or P2WPKH (false) address.
 	 * @return string The generated bech32 address.
 	 */
-	public function hexToSAddress($hexKey, $hrp = "bc", $witness = 0, $alt = false) {
+	private function hexToSAddress($hexKey, $hrp = "bc", $witness = 0, $alt = false) {
 		$charset = 'qpzry9x8gf2tvdw0s3jn54khce6mua7l';
 		$data = hex2bin($hexKey);
 		$step1 = $alt ? bin2hex(hash('sha256', $data, true)) . "0" : $this->hash160($data);
