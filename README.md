@@ -60,7 +60,9 @@ Contributions to **BitcoinAddressGenerator** are highly welcomed and appreciated
 
 If you find this project useful and would like to support its development, consider making a donation. Any contribution is greatly appreciated!
 
-**Bitcoin (BTC) Addresses:**  **1LToggio**f3rNUTCemJZSsxd1qubTYoSde6
+**Bitcoin (BTC) Addresses:**
+- **1LToggio**f3rNUTCemJZSsxd1qubTYoSde6  
+- **3LToggio**7Xx8qMsjCFfiarV4U2ZR9iU9ob 
 
 ## License
 **BitcoinAddressGenerator** is licensed under the Apache License, Version 2.0. You are free to use, modify, and distribute the library in compliance with the license.
