@@ -1,6 +1,6 @@
 <?php
 /**
- * Bitcoin Address Generator (BitcoinAddressGenerator) v1.0
+ * Universal Bitcoin Address Generator (BitcoinAddressGenerator) v1.0
  *
  * A PHP library for generating virtually any Bitcoin address format along with their private and public keys.
  *
